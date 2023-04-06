@@ -776,19 +776,21 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
     }
 
     window.addEventListener('mousemove', e => {
+        const boundingClientRect = canvas.getBoundingClientRect();
         pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-        pointers[0].dx = (e.clientX - pointers[0].x) * 5.0;
-        pointers[0].dy = (e.clientY - pointers[0].y) * 5.0;
-        pointers[0].x = e.clientX;
-        pointers[0].y = e.clientY;
+        pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+        pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+        pointers[0].x = e.clientX - boundingClientRect.x;
+        pointers[0].y = e.clientY - boundingClientRect.y;
     });
 
     window.addEventListener('touchmove', e => {
+        const boundingClientRect = canvas.getBoundingClientRect();
         pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-        pointers[0].dx = (e.touches[0].clientX - pointers[0].x) * 5.0;
-        pointers[0].dy = (e.touches[0].clientY - pointers[0].y) * 5.0;
-        pointers[0].x = e.touches[0].clientX;
-        pointers[0].y = e.touches[0].clientY;
+        pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+        pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+        pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
+        pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
     });
 
     window.addEventListener('mousedown', () => {
