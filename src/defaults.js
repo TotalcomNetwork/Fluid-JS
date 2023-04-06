@@ -39,7 +39,9 @@ export let behavior = {
 
     /* Background */
     background_color: { r: 15, g: 15, b: 15 },
-    transparent: false
+    transparent: false,
+
+    on_mousemove: false
 };
 
 export const DRAWING_PARAMS = {
@@ -472,5 +474,5 @@ export const SHADER_SOURCE = {
 };
 
 export function setBehaviors(params) {
-    behavior = {...behavior, ...params};
+    behavior = { ...behavior, ...params };
 }
