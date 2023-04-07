@@ -25,8 +25,8 @@ export function initWebGL(canvas) {
     let colorFormats = getFormats();
 
     /* Case support adjustments */
-    if (isMobile())
-        defaults.behavior.render_shaders = false;
+    //if (isMobile())
+    //defaults.behavior.render_shaders = false;
     if (!colorFormats.supportLinearFiltering) {
         defaults.behavior.render_shaders = false;
         defaults.behavior.render_bloom = false;
@@ -231,19 +231,18 @@ export function initWebGL(canvas) {
 }
 
 export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
+    /* TODO: Retrieve haul style */
+    const PARAMS = defaults.behavior;
+
+    active = true;
+
     if (active) {
         let nPointers = [];
         nPointers.push(new Pointer());
         pointers = nPointers;
     }
 
-    active = true;
-
-    /* TODO: Retrieve haul style */
-    const PARAMS = defaults.behavior;
-
     let bloomFrameBuffers = [];
-    let splatStack = [];
 
     let simWidth;
     let simHeight;
@@ -281,7 +280,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
 
     /* Initialize Fluid */
     init();
-    //multipleSplats(Math.random() * 20 + 5);
 
     /* Game Loop */
     let lastColorChangeTime = Date.now();
@@ -341,6 +339,44 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
             let fbo = createFBO(width, height, rgba.internalFormat, rgba.format, texType, filtering);
             bloomFrameBuffers.push(fbo);
         }
+
+        setTimeout(() => {
+            window.addEventListener('mousemove', e => {
+                const boundingClientRect = canvas.getBoundingClientRect();
+                pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
+                pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+                pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+                pointers[0].x = e.clientX - boundingClientRect.x;
+                pointers[0].y = e.clientY - boundingClientRect.y;
+            });
+
+            window.addEventListener('touchmove', e => {
+                const boundingClientRect = canvas.getBoundingClientRect();
+                pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
+                pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+                pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+                pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
+                pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
+            });
+
+            window.addEventListener('mousedown', () => {
+                pointers[0].down = true;
+                pointers[0].color = generateColor();
+            });
+
+            window.addEventListener('mouseup', () => {
+                pointers[0].down = PARAMS.on_mousemove || false;
+            });
+
+            window.addEventListener('keydown', e => {
+                if (e.code === 'KeyP')
+                    PARAMS.paused = !PARAMS.paused;
+            });
+
+            window.addEventListener('resize', e => {
+                resizeCanvas();
+            });
+        }, 500);
     }
 
     /**
@@ -462,7 +498,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
     }
 
     function update() {
-        resizeCanvas();
         input();
         if (!PARAMS.paused)
             step(0.016);
@@ -477,9 +512,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
     }
 
     function input() {
-        if (splatStack.length > 0)
-            multipleSplats(splatStack.pop());
-
         for (let i = 0; i < pointers.length; i++) {
             const p = pointers[i];
             if (p.moved) {
@@ -691,17 +723,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
         density.swap();
     }
 
-    function multipleSplats(amount) {
-        let color = {
-            r: 255,
-            b: 0,
-            g: 0
-        };
-
-        splat(500, 500, 100, 0, color);
-
-    }
-
     function resizeCanvas() {
         if (canvas.width != canvas.clientWidth || canvas.height != canvas.clientHeight) {
             canvas.width = canvas.clientWidth;
@@ -774,40 +795,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
             y: height / texture.height
         };
     }
-
-    window.addEventListener('mousemove', e => {
-        const boundingClientRect = canvas.getBoundingClientRect();
-        pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-        pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-        pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
-        pointers[0].x = e.clientX - boundingClientRect.x;
-        pointers[0].y = e.clientY - boundingClientRect.y;
-    });
-
-    window.addEventListener('touchmove', e => {
-        const boundingClientRect = canvas.getBoundingClientRect();
-        pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-        pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-        pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
-        pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
-        pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
-    });
-
-    window.addEventListener('mousedown', () => {
-        pointers[0].down = true;
-        pointers[0].color = generateColor();
-    });
-
-    window.addEventListener('mouseup', () => {
-        pointers[0].down = PARAMS.on_mousemove || false;
-    });
-
-    window.addEventListener('keydown', e => {
-        if (e.code === 'KeyP')
-            PARAMS.paused = !PARAMS.paused;
-        if (e.key === ' ')
-            splatStack.push(parseInt(Math.random() * 20) + 5);
-    });
 }
 
 /**
