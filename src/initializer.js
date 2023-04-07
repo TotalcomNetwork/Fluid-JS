@@ -25,8 +25,6 @@ export function initWebGL(canvas) {
     let colorFormats = getFormats();
 
     /* Case support adjustments */
-    //if (isMobile())
-    //defaults.behavior.render_shaders = false;
     if (!colorFormats.supportLinearFiltering) {
         defaults.behavior.render_shaders = false;
         defaults.behavior.render_bloom = false;
@@ -56,17 +54,6 @@ export function initWebGL(canvas) {
         gradientSubtract: compileShader(webGL.FRAGMENT_SHADER, defaults.SHADER_SOURCE.gradientSubtract)
     };
     let programs = formShaderPrograms(colorFormats.supportLinearFiltering);
-
-    /* Worker Classes and Functions */
-    /**
-     *  Is It Mobile?:
-     *  Detects whether or not a device is mobile by checking the user agent string
-     *
-     * @returns {boolean}
-     */
-    function isMobile() {
-        return /Mobi|Android/i.test(navigator.userAgent);
-    }
 
     /**
      *  Get Formats:
@@ -242,6 +229,44 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
         pointers = nPointers;
     }
 
+    setTimeout(() => {
+        window.addEventListener('mousemove', e => {
+            const boundingClientRect = canvas.getBoundingClientRect();
+            pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
+            pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+            pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+            pointers[0].x = e.clientX - boundingClientRect.x;
+            pointers[0].y = e.clientY - boundingClientRect.y;
+        });
+
+        window.addEventListener('touchmove', e => {
+            const boundingClientRect = canvas.getBoundingClientRect();
+            pointers[0].moved = true;
+            pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
+            pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+            pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
+            pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
+        });
+
+        window.addEventListener('mousedown', () => {
+            pointers[0].down = true;
+            pointers[0].color = generateColor();
+        });
+
+        window.addEventListener('mouseup', () => {
+            pointers[0].down = PARAMS.on_mousemove || false;
+        });
+
+        window.addEventListener('keydown', e => {
+            if (e.code === 'KeyP')
+                PARAMS.paused = !PARAMS.paused;
+        });
+
+        window.addEventListener('resize', e => {
+            resizeCanvas();
+        });
+    }, 500);
+
     let bloomFrameBuffers = [];
 
     let simWidth;
@@ -339,44 +364,6 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
             let fbo = createFBO(width, height, rgba.internalFormat, rgba.format, texType, filtering);
             bloomFrameBuffers.push(fbo);
         }
-
-        setTimeout(() => {
-            window.addEventListener('mousemove', e => {
-                const boundingClientRect = canvas.getBoundingClientRect();
-                pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-                pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-                pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
-                pointers[0].x = e.clientX - boundingClientRect.x;
-                pointers[0].y = e.clientY - boundingClientRect.y;
-            });
-
-            window.addEventListener('touchmove', e => {
-                const boundingClientRect = canvas.getBoundingClientRect();
-                pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-                pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-                pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
-                pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
-                pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
-            });
-
-            window.addEventListener('mousedown', () => {
-                pointers[0].down = true;
-                pointers[0].color = generateColor();
-            });
-
-            window.addEventListener('mouseup', () => {
-                pointers[0].down = PARAMS.on_mousemove || false;
-            });
-
-            window.addEventListener('keydown', e => {
-                if (e.code === 'KeyP')
-                    PARAMS.paused = !PARAMS.paused;
-            });
-
-            window.addEventListener('resize', e => {
-                resizeCanvas();
-            });
-        }, 500);
     }
 
     /**
