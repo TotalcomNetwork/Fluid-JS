@@ -9,6 +9,12 @@ This library is an extension on the fluid simulation implemented by [PavelDoGrea
 > This project is in early-development and open to contribution. Do not use this library in your production level project unless you have properly evaluated the performance and browser compatibility. 
 
 
+Dev
+--
+```
+docker stack deploy -c docker-compose.dev.yml fluid_js
+```
+
 Getting Started
 --
 ###### CDN
