@@ -291,8 +291,8 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
 
     setTimeout(() => {
         if (PARAMS.auto_animate) {
-            autoAnimate(canvas, pointers[1], PARAMS.auto_animate_speed)
-            autoAnimate(canvas, pointers[2], PARAMS.auto_animate_speed)
+            autoAnimate(canvas, pointers[1], 1000 / PARAMS.auto_animate_speed)
+            autoAnimate(canvas, pointers[2], 1000 / PARAMS.auto_animate_speed)
         }
 
         window.addEventListener('mousemove', e => {
