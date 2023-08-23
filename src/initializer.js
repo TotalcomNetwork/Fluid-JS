@@ -217,6 +217,63 @@ export function initWebGL(canvas) {
     }
 }
 
+function generateRandomIntInRange(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function generateEllipsePoints(h, k, a, b, numPoints) {
+    const points = [];
+    const step = (2 * Math.PI) / numPoints; // Divide the ellipse into numPoints segments
+
+    for (let t = 0; t < 2 * Math.PI; t += step) {
+        const x = (h + Math.random() * a * 0.02) + a * Math.cos(t);
+        const y = (k + Math.random() * b * 0.02) + b * Math.sin(t);
+        points.push({ x, y });
+    }
+
+    return Math.random() > 0.5 ? points.reverse() : points;
+}
+
+function randomSplat(canvas, pointer, numPoints) {
+    const boundingClientRect = canvas.getBoundingClientRect();
+
+    const p = generateEllipsePoints(
+        generateRandomIntInRange(-boundingClientRect.width / 4, boundingClientRect.width * 2),
+        generateRandomIntInRange(-boundingClientRect.height / 4, boundingClientRect.height * 2),
+        boundingClientRect.width / generateRandomIntInRange(1.5, 3),
+        boundingClientRect.height / generateRandomIntInRange(1.5, 3),
+        numPoints
+    );
+
+    let currentPointIndex = generateRandomIntInRange(10, numPoints / 2);
+    const endPointIndex = currentPointIndex + generateRandomIntInRange(numPoints * 0.4, numPoints * 0.5);
+
+    const splat = setInterval(() => {
+        if (currentPointIndex < endPointIndex) {
+            pointer.moved = true;
+            pointer.dx = p[currentPointIndex].x - p[currentPointIndex - 6].x;
+            pointer.dy = p[currentPointIndex].y - p[currentPointIndex - 6].y;
+            pointer.x = p[currentPointIndex].x;
+            pointer.y = p[currentPointIndex].y;
+            currentPointIndex++;
+        } else {
+            pointer.moved = false;
+            clearInterval(splat);
+        }
+    }, 1);
+}
+
+
+/**
+ * @param {number} numPoints determines the speed of the animation (many points = low speed, few points = high speed)
+ */
+function autoAnimate(canvas, pointer, numPoints) {
+    setInterval(() => {
+        randomSplat(canvas, pointer, numPoints);
+    }, numPoints * 2)
+
+}
+
 export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
     /* TODO: Retrieve haul style */
     const PARAMS = defaults.behavior;
@@ -226,15 +283,23 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
     if (active) {
         let nPointers = [];
         nPointers.push(new Pointer());
+        nPointers.push(new Pointer());
+        nPointers.push(new Pointer());
         pointers = nPointers;
     }
 
+
     setTimeout(() => {
+        if (PARAMS.auto_animate) {
+            autoAnimate(canvas, pointers[1], PARAMS.auto_animate_speed)
+            autoAnimate(canvas, pointers[2], PARAMS.auto_animate_speed)
+        }
+
         window.addEventListener('mousemove', e => {
             const boundingClientRect = canvas.getBoundingClientRect();
             pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-            pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-            pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+            pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5;
+            pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5;
             pointers[0].x = e.clientX - boundingClientRect.x;
             pointers[0].y = e.clientY - boundingClientRect.y;
         });
@@ -242,8 +307,8 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
         window.addEventListener('touchmove', e => {
             const boundingClientRect = canvas.getBoundingClientRect();
             pointers[0].moved = true;
-            pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5.0;
-            pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5.0;
+            pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5;
+            pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5;
             pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
             pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
         });

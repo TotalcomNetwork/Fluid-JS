@@ -41,7 +41,9 @@ export let behavior = {
     background_color: { r: 15, g: 15, b: 15 },
     transparent: false,
 
-    on_mousemove: false
+    on_mousemove: false,
+    auto_animate: false,
+    auto_animate_speed: 2000
 };
 
 export const DRAWING_PARAMS = {

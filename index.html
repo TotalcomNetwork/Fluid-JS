@@ -13,7 +13,16 @@
             const fluid = new Fluid(canvas);
 
             fluid.mapBehaviors({
-                on_mousemove: true
+                transparent: true,
+                dissipation: 0.981,
+                velocity: 0.91,
+                pressure: 0.8,
+                on_mousemove: true,
+                pressure_iteration: 40,
+                emitter_size: 0.98,
+                intensity: 2,
+                auto_animate: true,
+                auto_animate_speed: 1500
             });
 
             /* Activate the fluid */
