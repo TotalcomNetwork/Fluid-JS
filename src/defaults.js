@@ -43,7 +43,7 @@ export let behavior = {
 
     on_mousemove: false,
     auto_animate: false,
-    auto_animate_speed: 2000
+    auto_animate_speed: 0.6
 };
 
 export const DRAWING_PARAMS = {
