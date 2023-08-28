@@ -217,6 +217,10 @@ export function initWebGL(canvas) {
     }
 }
 
+function generateRandomFloatInRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 function generateRandomIntInRange(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -226,8 +230,8 @@ function generateEllipsePoints(h, k, a, b, numPoints) {
     const step = (2 * Math.PI) / numPoints; // Divide the ellipse into numPoints segments
 
     for (let t = 0; t < 2 * Math.PI; t += step) {
-        const x = (h + Math.random() * a * 0.04) + a * Math.cos(t);
-        const y = (k + Math.random() * b * 0.04) + b * Math.sin(t);
+        const x = (h + Math.random() * a * 0.02) + a * Math.cos(t);
+        const y = (k + Math.random() * b * 0.02) + b * Math.sin(t);
         points.push({ x, y });
     }
 
@@ -240,24 +244,25 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
     const p = generateEllipsePoints(
         generateRandomIntInRange(boundingClientRect.width / 5, boundingClientRect.width / 5 * 4),
         generateRandomIntInRange(boundingClientRect.height / 5, boundingClientRect.height / 5 * 4),
-        boundingClientRect.width / 3,
-        boundingClientRect.height / 3,
+        boundingClientRect.width / generateRandomFloatInRange(2, 4),
+        boundingClientRect.height / generateRandomFloatInRange(2, 4),
         numPoints
     );
 
-    let currentAcceleration = 0;
+    let currentAcceleration = 1;
     let currentPointIndex = generateRandomIntInRange(20, numPoints / 2);
     const endPointIndex = currentPointIndex + generateRandomIntInRange(numPoints * 0.3, numPoints * 0.4);
 
     const splat = setInterval(() => {
         if (currentPointIndex < endPointIndex) {
             pointer.moved = true;
-            pointer.dx = (p[currentPointIndex].x - p[currentPointIndex - generateRandomIntInRange(10, 12)].x) * 4;
-            pointer.dy = (p[currentPointIndex].y - p[currentPointIndex - generateRandomIntInRange(10, 12)].y) * 4;
+            pointer.dx = (p[currentPointIndex].x - p[currentPointIndex - generateRandomIntInRange(15, 20)].x) * 6;
+            pointer.dy = (p[currentPointIndex].y - p[currentPointIndex - generateRandomIntInRange(15, 20)].y) * 6;
             pointer.x = p[currentPointIndex].x;
             pointer.y = p[currentPointIndex].y;
-            currentPointIndex = currentPointIndex + (Math.floor(1 + currentAcceleration));
-            currentAcceleration += acceleration;
+            currentAcceleration = currentAcceleration + acceleration;
+            console.log(currentAcceleration);
+            currentPointIndex += Math.round(currentAcceleration);
         } else {
             pointer.moved = false;
             clearInterval(splat);
@@ -267,13 +272,16 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
 
 
 /**
- * @param {number} numPoints determines the speed of the animation (many points = low speed, few points = high speed)
+ * @param {number} speed determines the speed of the animation (many points = low speed, few points = high speed)
  */
-function autoAnimate(canvas, pointer, numPoints, acceleration) {
+function autoAnimate(canvas, pointer, speed, acceleration) {
+
+    let numPoints = 3600 / (speed + 1);
+
     randomSplat(canvas, pointer, numPoints, acceleration);
     setInterval(() => {
         randomSplat(canvas, pointer, numPoints, acceleration);
-    }, numPoints * 2.3)
+    }, numPoints)
 
 }
 
@@ -293,14 +301,14 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
 
     setTimeout(() => {
         if (PARAMS.auto_animate) {
-            autoAnimate(canvas, pointers[1], 3600 / PARAMS.auto_animate_speed || 1, PARAMS.auto_animate_acceleration)
+            autoAnimate(canvas, pointers[1], PARAMS.auto_animate_speed, PARAMS.auto_animate_acceleration)
         }
 
         window.addEventListener('mousemove', e => {
             const boundingClientRect = canvas.getBoundingClientRect();
             pointers[0].moved = PARAMS.on_mousemove || pointers[0].down;
-            pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 5;
-            pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 5;
+            pointers[0].dx = (e.clientX - boundingClientRect.x - pointers[0].x) * 8;
+            pointers[0].dy = (e.clientY - boundingClientRect.y - pointers[0].y) * 8;
             pointers[0].x = e.clientX - boundingClientRect.x;
             pointers[0].y = e.clientY - boundingClientRect.y;
         });
@@ -308,8 +316,8 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
         window.addEventListener('touchmove', e => {
             const boundingClientRect = canvas.getBoundingClientRect();
             pointers[0].moved = true;
-            pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 5;
-            pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 5;
+            pointers[0].dx = (e.touches[0].clientX - boundingClientRect.x - pointers[0].x) * 8;
+            pointers[0].dy = (e.touches[0].clientY - boundingClientRect.y - pointers[0].y) * 8;
             pointers[0].x = e.touches[0].clientX - boundingClientRect.x;
             pointers[0].y = e.touches[0].clientY - boundingClientRect.y;
         });
