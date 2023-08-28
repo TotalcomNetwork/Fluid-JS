@@ -234,17 +234,18 @@ function generateEllipsePoints(h, k, a, b, numPoints) {
     return Math.random() > 0.5 ? points.reverse() : points;
 }
 
-function randomSplat(canvas, pointer, numPoints) {
+function randomSplat(canvas, pointer, numPoints, acceleration) {
     const boundingClientRect = canvas.getBoundingClientRect();
 
     const p = generateEllipsePoints(
         generateRandomIntInRange(boundingClientRect.width / 5, boundingClientRect.width / 5 * 4),
         generateRandomIntInRange(boundingClientRect.height / 5, boundingClientRect.height / 5 * 4),
-        boundingClientRect.width / generateRandomIntInRange(4, 6),
-        boundingClientRect.height / generateRandomIntInRange(4, 6),
+        boundingClientRect.width / 3,
+        boundingClientRect.height / 3,
         numPoints
     );
 
+    let currentAcceleration = 0;
     let currentPointIndex = generateRandomIntInRange(20, numPoints / 2);
     const endPointIndex = currentPointIndex + generateRandomIntInRange(numPoints * 0.3, numPoints * 0.4);
 
@@ -255,7 +256,8 @@ function randomSplat(canvas, pointer, numPoints) {
             pointer.dy = (p[currentPointIndex].y - p[currentPointIndex - generateRandomIntInRange(10, 12)].y) * 4;
             pointer.x = p[currentPointIndex].x;
             pointer.y = p[currentPointIndex].y;
-            currentPointIndex++;
+            currentPointIndex = currentPointIndex + (Math.floor(1 + currentAcceleration));
+            currentAcceleration += acceleration;
         } else {
             pointer.moved = false;
             clearInterval(splat);
@@ -267,10 +269,10 @@ function randomSplat(canvas, pointer, numPoints) {
 /**
  * @param {number} numPoints determines the speed of the animation (many points = low speed, few points = high speed)
  */
-function autoAnimate(canvas, pointer, numPoints) {
-    randomSplat(canvas, pointer, numPoints);
+function autoAnimate(canvas, pointer, numPoints, acceleration) {
+    randomSplat(canvas, pointer, numPoints, acceleration);
     setInterval(() => {
-        randomSplat(canvas, pointer, numPoints);
+        randomSplat(canvas, pointer, numPoints, acceleration);
     }, numPoints * 2.3)
 
 }
@@ -291,7 +293,7 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
 
     setTimeout(() => {
         if (PARAMS.auto_animate) {
-            autoAnimate(canvas, pointers[1], 1000 / PARAMS.auto_animate_speed || 1)
+            autoAnimate(canvas, pointers[1], 3600 / PARAMS.auto_animate_speed || 1, PARAMS.auto_animate_acceleration)
         }
 
         window.addEventListener('mousemove', e => {
