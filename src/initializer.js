@@ -281,7 +281,7 @@ function autoAnimate(canvas, pointer, speed, acceleration) {
     randomSplat(canvas, pointer, numPoints, acceleration);
     setInterval(() => {
         randomSplat(canvas, pointer, numPoints, acceleration);
-    }, numPoints)
+    }, numPoints + 1000)
 
 }
 
