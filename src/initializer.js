@@ -256,8 +256,8 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
     const splat = setInterval(() => {
         if (currentPointIndex < endPointIndex) {
             pointer.moved = true;
-            pointer.dx = (p[currentPointIndex].x - p[currentPointIndex - generateRandomIntInRange(15, 20)].x) * 6;
-            pointer.dy = (p[currentPointIndex].y - p[currentPointIndex - generateRandomIntInRange(15, 20)].y) * 6;
+            pointer.dx = (p[currentPointIndex].x - p[currentPointIndex - generateRandomIntInRange(10, 15)].x) * 6;
+            pointer.dy = (p[currentPointIndex].y - p[currentPointIndex - generateRandomIntInRange(10, 15)].y) * 6;
             pointer.x = p[currentPointIndex].x;
             pointer.y = p[currentPointIndex].y;
             currentAcceleration = currentAcceleration + acceleration;
