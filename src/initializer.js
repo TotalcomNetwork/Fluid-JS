@@ -261,7 +261,6 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
             pointer.x = p[currentPointIndex].x;
             pointer.y = p[currentPointIndex].y;
             currentAcceleration = currentAcceleration + acceleration;
-            console.log(currentAcceleration);
             currentPointIndex += Math.round(currentAcceleration);
         } else {
             pointer.moved = false;
@@ -270,19 +269,18 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
     }, 1);
 }
 
-
 /**
  * @param {number} speed determines the speed of the animation (many points = low speed, few points = high speed)
  */
 function autoAnimate(canvas, pointer, speed, acceleration) {
-
-    let numPoints = 3600 / (speed + 1);
+    const numPoints = 3600 / (speed + 1);
+    const animationInterval = numPoints + 1500;
 
     randomSplat(canvas, pointer, numPoints, acceleration);
+
     setInterval(() => {
         randomSplat(canvas, pointer, numPoints, acceleration);
-    }, numPoints + 1000)
-
+    }, animationInterval);
 }
 
 export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
