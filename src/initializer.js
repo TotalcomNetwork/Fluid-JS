@@ -251,7 +251,7 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
 
     let currentAcceleration = 1;
     let currentPointIndex = generateRandomIntInRange(20, numPoints / 2);
-    const endPointIndex = currentPointIndex + generateRandomIntInRange(numPoints * 0.3, numPoints * 0.4);
+    const endPointIndex = numPoints;
 
     const splat = setInterval(() => {
         if (currentPointIndex < endPointIndex) {
@@ -274,7 +274,7 @@ function randomSplat(canvas, pointer, numPoints, acceleration) {
  */
 function autoAnimate(canvas, pointer, speed, acceleration) {
     const numPoints = 3600 / (speed + 1);
-    const animationInterval = numPoints + 1500;
+    const animationInterval = numPoints + 500;
 
     randomSplat(canvas, pointer, numPoints, acceleration);
 
@@ -299,7 +299,8 @@ export function activator(canvas, webGL, colorFormat, PROGRAMS, pointers) {
 
     setTimeout(() => {
         if (PARAMS.auto_animate) {
-            autoAnimate(canvas, pointers[1], PARAMS.auto_animate_speed, PARAMS.auto_animate_acceleration)
+            autoAnimate(canvas, pointers[1], PARAMS.auto_animate_speed, PARAMS.auto_animate_acceleration);
+
         }
 
         window.addEventListener('mousemove', e => {
